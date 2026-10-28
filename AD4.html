@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي درافت الأنمي - Anime Draft Challenge</title>
+    <style>
+        :root {
+            --bg-main: #0a0d1a;
+            --bg-card: #121829;
+            --bg-card-selected: #1a2238;
+            --accent-gold: #f59e0b;
+            --accent-pink: #ec4899;
+            --accent-purple: #8b5cf6;
+            --border-color: #2a344d;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 15px;
+            direction: rtl;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Header UI */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 10px 0;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-pink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sound-icon {
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Titles */
+        .section-main-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .group-label {
+            color: var(--accent-gold);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Selection Cards Grids */
+        .grid-players {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .grid-anime {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .select-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .select-card:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .select-card.selected {
+            background: var(--bg-card-selected);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        }
+
+        .card-icon {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+
+        .card-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .card-lbl {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-sub {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        .anime-en {
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .anime-ar {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 2px;
+            margin-bottom: 6px;
+        }
+
+        /* Buttons */
+        .btn-start {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-gold), #d97706);
+            color: #000;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+            transition: transform 0.15s, opacity 0.15s;
+        }
+
+        .btn-start:active {
+            transform: scale(0.98);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Screen Visibility */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Draft Interface Style */
+        .draft-header-status {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 12px 18px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+        }
+
+        .char-box-display {
+            background: var(--bg-card);
+            border: 2px dashed var(--accent-gold);
+            border-radius: 20px;
+            padding: 35px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .char-title-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .secret-blur {
+            filter: blur(10px);
+            user-select: none;
+        }
+
+        .btn-reveal-secret {
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 800;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+
+        .teams-grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .btn-assign-team {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 14px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-assign-team:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .teams-live-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .team-col {
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .team-col h4 {
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .team-col ul {
+            list-style: none;
+        }
+
+        .team-col li {
+            padding: 3px 0;
+            color: var(--text-sub);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 18px;
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-yes { background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 10px; flex: 1; font-weight: 800; cursor: pointer;}
+        .btn-no { background: var(--danger); color: #fff; border: none; padding: 12px; border-radius: 10px; flex: 1; font-weight: 800; cursor: pointer;}
+
+        /* Final Winner Card */
+        .winner-banner {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: #000;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .winner-banner h2 { font-size: 1.8rem; font-weight: 800; }
+
+        .results-list {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .res-team-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 14px;
+        }
+
+        .res-team-card.gold-border {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+        }
+
+        .res-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--accent-pink);
+            margin-bottom: 10px;
+        }
+
+        .res-list {
+            list-style: none;
+            font-size: 0.9rem;
+        }
+
+        .res-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed var(--border-color);
+            color: var(--text-sub);
+        }
+
+        .score-pill {
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- Top Header Bar -->
+    <div class="app-header">
+        <div class="sound-icon">🔊</div>
+        <div class="app-title">تحدي درافت الأنمي ⚡</div>
+    </div>
+
+    <!-- SCREEN 1: SETUP (MATCHING IMAGE DESIGN) -->
+    <div id="screen-setup" class="screen active">
+        <h1 class="section-main-title">إعدادات اللعبة</h1>
+        <p class="section-subtitle">اختر عدد اللاعبين والأنمي المفضل لبدء التحدي</p>
+
+        <!-- 1. Player Count Selection -->
+        <span class="group-label">1. اختر عدد اللاعبين والفرق:</span>
+        <div class="grid-players">
+            <div class="select-card" data-players="2" onclick="selectPlayers(2)">
+                <div class="card-icon">👥</div>
+                <div class="card-val">2</div>
+                <div class="card-lbl">لاعبين</div>
+                <div class="card-sub">10 شخصيات</div>
+            </div>
+            <div class="select-card selected" data-players="3" onclick="selectPlayers(3)">
+                <div class="card-icon">👥👥</div>
+                <div class="card-val">3</div>
+                <div class="card-lbl">لاعبين</div>
+                <div class="card-sub">15 شخصية</div>
+            </div>
+            <div class="select-card" data-players="4" onclick="selectPlayers(4)">
+                <div class="card-icon">👨‍👩‍👧‍👦</div>
+                <div class="card-val">4</div>
+                <div class="card-lbl">لاعبين</div>
+                <div class="card-sub">20 شخصية</div>
+            </div>
+        </div>
+
+        <!-- 2. Anime Selection -->
+        <span class="group-label">2. اختر عالم الأنمي:</span>
+        <div class="grid-anime">
+            <div class="select-card" data-anime="hxh" onclick="selectAnime('hxh')">
+                <div class="anime-en">Hunter x Hunter</div>
+                <div class="anime-ar">(القناص) 🟡</div>
+                <div class="card-sub">30 شخصية متاحة</div>
+            </div>
+            <div class="select-card" data-anime="mha" onclick="selectAnime('mha')">
+                <div class="anime-en">My Hero Academia</div>
+                <div class="anime-ar">(أكاديمية بطلية) 🟡</div>
+                <div class="card-sub">30 شخصية متاحة</div>
+            </div>
+            <div class="select-card" data-anime="jjk" onclick="selectAnime('jjk')">
+                <div class="anime-en">Jujutsu Kaisen</div>
+                <div class="anime-ar">(جوجوتسو كايسن) 🟡</div>
+                <div class="card-sub">31 شخصية متاحة</div>
+            </div>
+            <div class="select-card" data-anime="tokyo_ghoul" onclick="selectAnime('tokyo_ghoul')">
+                <div class="anime-en">Tokyo Ghoul</div>
+                <div class="anime-ar">(طوكيو غول) 🟡</div>
+                <div class="card-sub">20 شخصية متاحة</div>
+            </div>
+            <div class="select-card" data-anime="naruto" onclick="selectAnime('naruto')">
+                <div class="anime-en">Naruto Shippuden</div>
+                <div class="anime-ar">(ناروتو) 🟡</div>
+                <div class="card-sub">30 شخصية متاحة</div>
+            </div>
+            <div class="select-card" data-anime="demon_slayer" onclick="selectAnime('demon_slayer')">
+                <div class="anime-en">Demon Slayer</div>
+                <div class="anime-ar">(قاتل الشياطين) 🟡</div>
+                <div class="card-sub">30 شخصية متاحة</div>
+            </div>
+            <div class="select-card" data-anime="dragon_ball" onclick="selectAnime('dragon_ball')">
+                <div class="anime-en">Dragon Ball</div>
+                <div class="anime-ar">(دراغون بول) 🟡</div>
+                <div class="card-sub">30 شخصية متاحة</div>
+            </div>
+        </div>
+
+        <button id="btn-start-game" class="btn-start" onclick="startGame()" disabled>ابدأ التحدي الآن 🔥</button>
+    </div>
+
+    <!-- SCREEN 2: DRAFTING GAMEPLAY -->
+    <div id="screen-draft" class="screen">
+        <div class="draft-header-status">
+            <span id="anime-title-label">الأنمي: -</span>
+            <span id="draft-counter-label">الشخصية: 1 / 15</span>
+        </div>
+
+        <div class="char-box-display">
+            <div id="char-name-text" class="char-title-text">...</div>
+            <button id="btn-reveal-secret" class="btn-reveal-secret" style="display:none;" onclick="revealSecretChar()">إكشف الاسم السرّي 👁️</button>
+        </div>
+
+        <span class="group-label">حدد الفريق الذي سياخذ هذه الشخصية:</span>
+        <div id="team-buttons-container" class="teams-grid-buttons"></div>
+
+        <div id="teams-live-container" class="teams-live-box"></div>
+    </div>
+
+    <!-- SCREEN 3: RESULTS -->
+    <div id="screen-results" class="screen">
+        <div class="winner-banner">
+            <h2 id="winner-team-title">🏆 الفائز: -</h2>
+            <p id="winner-score-p">إجمالي النقاط: 0</p>
+        </div>
+
+        <div id="results-grid-container" class="results-list"></div>
+
+        <button class="btn-start" onclick="resetGame()">لعب جولة جديدة 🔄</button>
+    </div>
+
+</div>
+
+<!-- OPTIONAL CHAR MODAL -->
+<div id="modal-optional" class="modal-overlay">
+    <div class="modal-card">
+        <h3 style="color: var(--accent-gold); margin-bottom: 10px;">الشخصية الإضافية الاختيارية! 🎁</h3>
+        <p style="color: var(--text-sub); font-size: 0.95rem;">هل تريدون إضافة الشخصية الأخيرة والجواكر للجولة؟</p>
+        <div class="modal-actions">
+            <button class="btn-yes" onclick="confirmOptional(true)">نعم، أضفها</button>
+            <button class="btn-no" onclick="confirmOptional(false)">لا، إنهِ اللعبة</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Exact Database
+const animeRoster = {
+    hxh: {
+        name: "Hunter x Hunter",
+        chars: [
+            { name: "Ikalgo", score: 8 }, { name: "Leorio PALADIKNIGHT", score: 10 }, { name: "Melody", score: 6 },
+            { name: "Amane", score: 5 }, { name: "Amori", score: 2 }, { name: "Binolt", score: 7 }, { name: "Bodoro", score: 4 },
+            { name: "Hisoka MOROW", score: 20 }, { name: "Neferpitou", score: 20 }, { name: "Feitan PORTOR", score: 17 },
+            { name: "Uvogin", score: 15 }, { name: "Biscuit KRUEGER", score: 16 }, { name: "Knuckle BINE", score: 14 },
+            { name: "Menthuthuyoupi", score: 20 }, { name: "Morel MCCARNATHY", score: 15 }, { name: "Shaiapouf", score: 19 },
+            { name: "Agon", score: 11 }, { name: "Bonolenov NDONGO", score: 13 }, { name: "Botobai GIGANTE", score: 14 },
+            { name: "Bourbon", score: 11 }, { name: "Kite", score: 16 }, { name: "Isaac NETERO", score: 29 },
+            { name: "Killua ZOLDYCK", score: 26 }, { name: "Illumi ZOLDYCK", score: 25 }, { name: "Kurapika", score: 26 },
+            { name: "Meruem", score: 30 }, { name: "Gon FREECSS", score: 27 }, { name: "Chrollo LUCILFER", score: 28 },
+            { name: "Alluka ZOLDYCK", score: 25 }, { name: "Zeno ZOLDYCK", score: 27 }
+        ]
+    },
+    mha: {
+        name: "My Hero Academia",
+        chars: [
+            { name: "Kyoka JIRO", score: 6 }, { name: "Mina ASHIDO", score: 6 }, { name: "Momo YAOYOROZU", score: 7 },
+            { name: "Tenya IIDA", score: 9 }, { name: "Mount Lady", score: 8 }, { name: "Toru HAGAKURE", score: 4 },
+            { name: "Fumikage TOKOYAMI", score: 15 }, { name: "Shota AIZAWA", score: 16 }, { name: "Stain", score: 14 },
+            { name: "Nana SHIMURA", score: 17 }, { name: "Hawks", score: 18 }, { name: "Overhaul", score: 18 },
+            { name: "Mirko", score: 17 }, { name: "Best Jeanist", score: 16 }, { name: "Gigantomachia", score: 20 },
+            { name: "Himiko TOGA", score: 13 }, { name: "Ochaco URARAKA", score: 12 }, { name: "Twice", score: 14 },
+            { name: "Mirio TOGATA", score: 19 }, { name: "Hitoshi SHINSO", score: 11 }, { name: "Mr. Compress", score: 12 },
+            { name: "All Might", score: 29 }, { name: "All For One", score: 30 }, { name: "Endeavor", score: 27 },
+            { name: "Star And Stripe", score: 28 }, { name: "Izuku MIDORIYA", score: 29 }, { name: "Katsuki BAKUGO", score: 26 },
+            { name: "Tomura SHIGARAKI", score: 30 }, { name: "Dabi", score: 25 }, { name: "Shoto TODOROKI", score: 26 }
+        ]
+    },
+    jjk: {
+        name: "Jujutsu Kaisen",
+        chars: [
+            { name: "Nobara KUGISAKI", score: 8 }, { name: "Junpei YOSHINO", score: 4 }, { name: "Finger Bearer", score: 7 },
+            { name: "Haruta SHIGEMO", score: 5 }, { name: "Kasumi MIWA", score: 3 }, { name: "Kyotaka IJICHI", score: 2 },
+            { name: "Mai ZEN'IN", score: 3 }, { name: "Aoi TODO", score: 16 }, { name: "Kento NANAMI", score: 16 },
+            { name: "Mahito", score: 19 }, { name: "Maki ZEN'IN", score: 17 }, { name: "Panda", score: 13 },
+            { name: "Toge INUMAKI", score: 13 }, { name: "Choso", score: 17 }, { name: "Jogo", score: 19 },
+            { name: "Mei Mei", score: 14 }, { name: "Naobito ZEN'IN", score: 15 }, { name: "Yuki TSUKUMO", score: 20 },
+            { name: "Dagon", score: 16 }, { name: "Hiromi HIGURUMA", score: 15 }, { name: "Masamichi YAGA", score: 12 },
+            { name: "Hanami", score: 17 }, { name: "Mechamaru Ultimate", score: 14 }, { name: "Satoru GOJO", score: 30 },
+            { name: "Ryomen Sukuna", score: 30 }, { name: "Yuuta OKKOTSU", score: 28 }, { name: "Suguru GETO", score: 26 },
+            { name: "Toji FUSHIGURO", score: 27 }, { name: "Uraume", score: 25 }, { name: "Megumi FUSHIGURO", score: 24 },
+            { name: "Yuji ITADORI", score: 23 }
+        ]
+    },
+    tokyo_ghoul: {
+        name: "Tokyo Ghoul",
+        chars: [
+            { name: "Touka KIRISHIMA", score: 8 }, { name: "Hideyoshi NAGACHIKA", score: 2 }, { name: "Hinami FUEGUCHI", score: 6 },
+            { name: "Nishio NISHIKI", score: 7 }, { name: "Nico", score: 5 }, { name: "Koutarou AMON", score: 16 },
+            { name: "Seidou TAKIZAWA", score: 18 }, { name: "Tatara", score: 17 }, { name: "Shuu TSUKIYAMA", score: 15 },
+            { name: "Yamori", score: 14 }, { name: "Ayato KIRISHIMA", score: 15 }, { name: "Kuki URIE", score: 14 },
+            { name: "Rize KAMISHIRO", score: 16 }, { name: "Kurona YASUHISA", score: 12 }, { name: "Renji YOMO", score: 16 },
+            { name: "Ken KANEKI", score: 30 }, { name: "Kishou Arima", score: 29 }, { name: "Yoshimura", score: 27 },
+            { name: "Eto", score: 28 }, { name: "Juuzou SUZUYA", score: 26 }
+        ]
+    },
+    naruto: {
+        name: "Naruto Shippuden",
+        chars: [
+            { name: "Sakura HARUNO", score: 9 }, { name: "Hinata HYUGA", score: 7 }, { name: "Ino YAMANAKA", score: 5 },
+            { name: "Kiba INUZUKA", score: 4 }, { name: "Tenten", score: 3 }, { name: "Kakashi Hatake", score: 18 },
+            { name: "Tsunade", score: 17 }, { name: "Jiraiya", score: 18 }, { name: "Fourth Raikage", score: 18 },
+            { name: "Gaara", score: 16 }, { name: "Danzo SHIMURA", score: 15 }, { name: "Killer B", score: 18 },
+            { name: "Rock Lee", score: 14 }, { name: "Neji HYUGA", score: 13 }, { name: "Onoki", score: 17 },
+            { name: "Konan", score: 14 }, { name: "Shikamaru NARA", score: 13 }, { name: "Yamato", score: 12 },
+            { name: "Kisame HOSHIGAKI", score: 16 }, { name: "Orochimaru", score: 17 }, { name: "Madara UCHIHA", score: 29 },
+            { name: "Hashirama SENJU", score: 28 }, { name: "Minato NAMIKAZE", score: 27 }, { name: "Itachi UCHIHA", score: 26 },
+            { name: "Kaguya", score: 30 }, { name: "Maito GAI", score: 27 }, { name: "Sasuke UCHIHA", score: 29 },
+            { name: "Naruto UZUMAKI", score: 29 }, { name: "Obito UCHIHA", score: 28 }, { name: "Pain", score: 26 }
+        ]
+    },
+    demon_slayer: {
+        name: "Demon Slayer",
+        chars: [
+            { name: "Genya SHINAZUGAWA", score: 6 }, { name: "Gyokko", score: 9 }, { name: "Kanao TSUYURI", score: 7 },
+            { name: "Mitsuri KANROJI", score: 8 }, { name: "Shinobu KOCHOU", score: 7 }, { name: "Kanae KOCHOU", score: 6 },
+            { name: "Murata", score: 2 }, { name: "Kagaya UBUYASHIKI", score: 1 }, { name: "Rokuro", score: 4 },
+            { name: "Kamanue", score: 3 }, { name: "Inosuke HASHIBIRA", score: 14 }, { name: "Zenitsu AGATSUMA", score: 15 },
+            { name: "Tanjirou KAMADO", score: 16 }, { name: "Muichiro TOKITO", score: 18 }, { name: "Obanai IGURO", score: 17 },
+            { name: "Tengen UZUI", score: 16 }, { name: "Sanemi SHINAZUGAWA", score: 18 }, { name: "Nezuko KAMADO", score: 14 },
+            { name: "Shinjurou RENGOKU", score: 13 }, { name: "Sakonji UROKODAKI", score: 12 }, { name: "Gyutaro", score: 16 },
+            { name: "Giyuu TOMIOKA", score: 18 }, { name: "Nakime", score: 13 }, { name: "Zohakuten", score: 19 },
+            { name: "Akaza", score: 28 }, { name: "Kokushibo", score: 29 }, { name: "Muzan KIBUTSUJI", score: 29 },
+            { name: "Yoriichi TSUGIKUNI", score: 30 }, { name: "Kyoujurou RENGOKU", score: 26 }, { name: "Gyoumei HIMEJIMA", score: 27 }
+        ]
+    },
+    dragon_ball: {
+        name: "Dragon Ball",
+        chars: [
+            { name: "Bulma", score: 2 }, { name: "Mai", score: 3 }, { name: "Krillin", score: 8 },
+            { name: "Master Roshi", score: 7 }, { name: "Mr. Satan", score: 1 }, { name: "Goku SON", score: 19 },
+            { name: "Vegeta", score: 19 }, { name: "Gohan SON", score: 18 }, { name: "Goku Black", score: 18 },
+            { name: "Trunks Future", score: 16 }, { name: "Piccolo", score: 15 }, { name: "Android 17", score: 17 },
+            { name: "Android 18", score: 16 }, { name: "Frieza", score: 18 }, { name: "Jiren", score: 20 },
+            { name: "Hit", score: 18 }, { name: "Toppo", score: 17 }, { name: "Majin Buu", score: 17 },
+            { name: "Bergamo", score: 13 }, { name: "Cell", score: 17 }, { name: "Bardock", score: 12 },
+            { name: "King Vegeta", score: 11 }, { name: "Beerus", score: 28 }, { name: "Whis", score: 29 },
+            { name: "Zenou", score: 30 }, { name: "Daishinkan", score: 30 }, { name: "Vados", score: 29 },
+            { name: "Zamasu", score: 26 }, { name: "Champa", score: 27 }, { name: "Broly", score: 26 }
+        ]
+    }
+};
+
+// Selections & State
+let selectedPlayerNum = 3;
+let selectedAnimeKey = "";
+let baseTotalChars = 15;
+let secretCharIndex = 10;
+let currentDraftPool = [];
+let currentDraftIndex = 0;
+let teamsData = [];
+let isSecretRevealed = false;
+let isOptionalStage = false;
+
+function selectPlayers(count) {
+    selectedPlayerNum = count;
+    document.querySelectorAll('.grid-players .select-card').forEach(card => {
+        card.classList.toggle('selected', parseInt(card.getAttribute('data-players')) === count);
+    });
+    checkStartValidity();
+}
+
+function selectAnime(key) {
+    selectedAnimeKey = key;
+    document.querySelectorAll('.grid-anime .select-card').forEach(card => {
+        card.classList.toggle('selected', card.getAttribute('data-anime') === key);
+    });
+    checkStartValidity();
+}
+
+function checkStartValidity() {
+    const btn = document.getElementById('btn-start-game');
+    btn.disabled = !(selectedPlayerNum && selectedAnimeKey);
+}
+
+function startGame() {
+    if (selectedPlayerNum === 2) {
+        baseTotalChars = 10;
+        secretCharIndex = 5;
+    } else if (selectedPlayerNum === 3) {
+        baseTotalChars = 15;
+        secretCharIndex = 10;
+    } else {
+        baseTotalChars = 20;
+        secretCharIndex = 15;
+    }
+
+    let fullList = [...animeRoster[selectedAnimeKey].chars];
+    fullList.sort(() => Math.random() - 0.5);
+    currentDraftPool = fullList.slice(0, baseTotalChars + 1);
+
+    teamsData = Array.from({ length: selectedPlayerNum }, () => []);
+
+    document.getElementById("anime-title-label").innerText = "الأنمي: " + animeRoster[selectedAnimeKey].name;
+    currentDraftIndex = 0;
+    isOptionalStage = false;
+
+    renderTeamsButtons();
+    renderTeamsLive();
+
+    showScreen("screen-draft");
+    loadNextDraftChar();
+}
+
+function renderTeamsButtons() {
+    const container = document.getElementById("team-buttons-container");
+    container.innerHTML = "";
+
+    teamsData.forEach((team, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "btn-assign-team";
+        btn.innerText = `فريق ${idx + 1}`;
+
+        if (!isOptionalStage && team.length >= 5) {
+            btn.disabled = true;
+            btn.innerText += " (مكتمل)";
+        } else {
+            btn.onclick = () => assignCharToTeam(idx);
+        }
+        container.appendChild(btn);
+    });
+}
+
+function renderTeamsLive() {
+    const container = document.getElementById("teams-live-container");
+    container.innerHTML = "";
+
+    teamsData.forEach((team, idx) => {
+        const col = document.createElement("div");
+        col.className = "team-col";
+        col.innerHTML = `<h4>فريق ${idx + 1} (${team.length})</h4>`;
+        const ul = document.createElement("ul");
+        team.forEach(c => {
+            const li = document.createElement("li");
+            li.innerText = c.name;
+            ul.appendChild(li);
+        });
+        col.appendChild(ul);
+        container.appendChild(col);
+    });
+}
+
+function loadNextDraftChar() {
+    const nameTxt = document.getElementById("char-name-text");
+    const revealBtn = document.getElementById("btn-reveal-secret");
+    const counterLbl = document.getElementById("draft-counter-label");
+
+    const currentNum = currentDraftIndex + 1;
+    counterLbl.innerText = `الشخصية: ${currentNum} / ${isOptionalStage ? baseTotalChars + 1 : baseTotalChars}`;
+
+    if (currentNum === secretCharIndex && !isSecretRevealed) {
+        nameTxt.innerText = "🔒 شخصية سرية 🔒";
+        nameTxt.classList.add("secret-blur");
+        revealBtn.style.display = "inline-block";
+    } else {
+        nameTxt.innerText = currentDraftPool[currentDraftIndex].name;
+        nameTxt.classList.remove("secret-blur");
+        revealBtn.style.display = "none";
+    }
+
+    renderTeamsButtons();
+}
+
+function revealSecretChar() {
+    isSecretRevealed = true;
+    loadNextDraftChar();
+}
+
+function assignCharToTeam(teamIdx) {
+    teamsData[teamIdx].push(currentDraftPool[currentDraftIndex]);
+    renderTeamsLive();
+
+    currentDraftIndex++;
+    isSecretRevealed = false;
+
+    if (currentDraftIndex < baseTotalChars) {
+        loadNextDraftChar();
+    } else if (currentDraftIndex === baseTotalChars) {
+        document.getElementById("modal-optional").style.display = "flex";
+    } else {
+        finishGameAndShowResults();
+    }
+}
+
+function confirmOptional(accept) {
+    document.getElementById("modal-optional").style.display = "none";
+    if (accept) {
+        isOptionalStage = true;
+        loadNextDraftChar();
+    } else {
+        finishGameAndShowResults();
+    }
+}
+
+function finishGameAndShowResults() {
+    let topScore = -1;
+    let winningTeamIdx = -1;
+
+    const resGrid = document.getElementById("results-grid-container");
+    resGrid.innerHTML = "";
+
+    teamsData.forEach((team, idx) => {
+        const totalScore = team.reduce((sum, item) => sum + item.score, 0);
+        if (totalScore > topScore) {
+            topScore = totalScore;
+            winningTeamIdx = idx;
+        }
+
+        const card = document.createElement("div");
+        card.className = "res-team-card";
+
+        let itemsHtml = "<ul class='res-list'>";
+        team.forEach(c => {
+            itemsHtml += `<li><span>${c.name}</span><span class='score-pill'>${c.score} نقطة</span></li>`;
+        });
+        itemsHtml += "</ul>";
+
+        card.innerHTML = `
+            <div class="res-header">
+                <span>فريق ${idx + 1}</span>
+                <span class="score-pill">${totalScore} نقطة</span>
+            </div>
+            ${itemsHtml}
+        `;
+        resGrid.appendChild(card);
+    });
+
+    document.getElementById("winner-team-title").innerText = `🏆 الفائز: فريق ${winningTeamIdx + 1}`;
+    document.getElementById("winner-score-p").innerText = `إجمالي مجموع النقاط: ${topScore} نقطة`;
+
+    document.querySelectorAll(".res-team-card")[winningTeamIdx].classList.add("gold-border");
+
+    showScreen("screen-results");
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function resetGame() {
+    showScreen("screen-setup");
+}
+</script>
+
+</body>
+</html>
