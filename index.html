@@ -720,18 +720,30 @@ function renderTeamsLive() {
 
 function loadNextDraftChar() {
     const nameTxt = document.getElementById("char-name-text");
+    const photoImg = document.getElementById("char-photo-img");
     const revealBtn = document.getElementById("btn-reveal-secret");
     const counterLbl = document.getElementById("draft-counter-label");
 
     const currentNum = currentDraftIndex + 1;
     counterLbl.innerText = `الشخصية: ${currentNum} / ${isOptionalStage ? baseTotalChars + 1 : baseTotalChars}`;
 
+    const currentChar = currentDraftPool[currentDraftIndex];
+
+    // Gestion de l'affichage de l'image
+    if (currentChar.img && currentChar.img.trim() !== "") {
+        photoImg.src = currentChar.img;
+        photoImg.style.display = "block";
+    } else {
+        photoImg.style.display = "none";
+    }
+
     if (currentNum === secretCharIndex && !isSecretRevealed) {
         nameTxt.innerText = "🔒 شخصية سرية 🔒";
         nameTxt.classList.add("secret-blur");
+        photoImg.style.display = "none";
         revealBtn.style.display = "inline-block";
     } else {
-        nameTxt.innerText = currentDraftPool[currentDraftIndex].name;
+        nameTxt.innerText = currentChar.name;
         nameTxt.classList.remove("secret-blur");
         revealBtn.style.display = "none";
     }
